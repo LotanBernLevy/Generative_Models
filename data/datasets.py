@@ -55,7 +55,7 @@ class RandomDataModule(pl.LightningDataModule):
     
 
 class MNISTDataModule(pl.LightningDataModule):
-    def __init__(self, data_dir: str, batch_size: int = 32, num_workers: int = 0, pin_memory: bool = False, val_split:int = None,
+    def __init__(self, data_dir: str, batch_size: int = 64, num_workers: int = 0, pin_memory: bool = False, val_split:int = None,
         **kwargs,):
         super().__init__()
         self.data_dir = data_dir
@@ -80,9 +80,8 @@ class MNISTDataModule(pl.LightningDataModule):
                                     ]))
 
         if self.val_split is not None:
-            val_length = min(int((len(self.train_data) + len(self.test_data)) * self.val_split), len(self.test_data))
-            test_length = max(0, len(self.test_data) - val_length)
-            print(val_length, test_length, len(self.test_data))
+            val_length = int(len(self.test_data)* self.val_split)
+            test_length = int(len(self.test_data)* (1-self.val_split))
 
             self.test_data = torch.utils.data.random_split(self.test_data, [val_length, test_length])
 
@@ -91,12 +90,12 @@ class MNISTDataModule(pl.LightningDataModule):
 
     def val_dataloader(self):
         val_data = self.test_data
-        if isinstance(self.test_data, tuple):
+        if isinstance(self.test_data, list):
             val_data = self.test_data[0]
         return DataLoader(val_data, batch_size=self.batch_size, shuffle=False, num_workers=self.num_workers, pin_memory=self.pin_memory)
 
     def test_dataloader(self):
         test_data = self.test_data
-        if isinstance(self.test_data, tuple):
+        if isinstance(self.test_data, list):
             test_data = self.test_data[1]
         return DataLoader(test_data, batch_size=128, shuffle=True, num_workers=self.num_workers, pin_memory=self.pin_memory)

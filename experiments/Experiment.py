@@ -18,6 +18,7 @@ class Experiment(pl.LightningModule):
         super(Experiment, self).__init__()
         self.model = model
         self.save_hyperparameters(ignore=["model"])
+        self.save_hyperparameters(model.hparams)
 
 
 
@@ -36,9 +37,7 @@ class Experiment(pl.LightningModule):
         return loss_dict['loss']
 
 
-    def validation_step(self, batch, batch_idx):
-
-        
+    def validation_step(self, batch, batch_idx):        
         vinputs, label = batch
         voutputs = self(vinputs)
 
